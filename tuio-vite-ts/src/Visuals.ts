@@ -1,25 +1,25 @@
 export class Visuals {
-    _rgbColor;
-    _thickness = [10.0, 5.375, 3.0, 2.125, 2.0];
-    _didAppear;
-    _actFrame;
-    _alpha;
-    _drawAlpha;
-    _alphaDirection;
-    _appearAlphaStep;
-    _maxAlpha;
-    _alphaStep;
-    fps = 60;
-    _delay = [
+    private _rgbColor: { r: number; g: number; b: number } | null;
+    private _thickness: number[] = [10.0, 5.375, 3.0, 2.125, 2.0];
+    private _didAppear: boolean;
+    private _actFrame: number;
+    private _alpha: number[];
+    private _drawAlpha: number[];
+    private _alphaDirection: number[];
+    private _appearAlphaStep: number[];
+    private _maxAlpha: number;
+    private _alphaStep: number[];
+    private fps: number = 60;
+    private _delay: number[] = [
         0,
         this.fps / 1000.0 * 160,
         this.fps / 1000.0 * 340,
         this.fps / 1000.0 * 540,
         this.fps / 1000.0 * 760
     ];
-    _hexColor;
-    _rotation = [0.0, 0.0, 0.0, 0.0, 0.0];
-    _rotationOffset = [
+    private _hexColor: string;
+    private _rotation = [0.0, 0.0, 0.0, 0.0, 0.0];
+    private _rotationOffset = [
         (360.0 / (this.fps * 10.0)),
         (-360.0 / (this.fps * 12.5)),
         (360.0 / (this.fps * 15.0)),
@@ -28,14 +28,14 @@ export class Visuals {
     ];
 
     /*Radius*/
-    _maxScale = 1.075;
-    _radius
-    _maxRadius
-    _drawRadius
-    _radiusStep
-    _radiusDirection = [1, 1, 1, 1, 1];
+    private _maxScale = 1.075;
+    private _radius: number[]
+    private _maxRadius: number[]
+    private _drawRadius: number[]
+    private _radiusStep: number[]
+    private _radiusDirection: number[] = [1, 1, 1, 1, 1];
 
-    constructor(color, isTouch = false) {
+    constructor(color: string, isTouch: boolean = false) {
         this.fps = 60;
 
         /*General*/
@@ -95,7 +95,7 @@ export class Visuals {
         this._rgbColor = this.hexToRgb(this._hexColor);
     }
 
-    getCircle(index) {
+    getCircle(index: number) {
         index = index % 5;
         return {
             radius: this._drawRadius[index],
@@ -118,7 +118,7 @@ export class Visuals {
         this.stepRadius();
     }
 
-    stepAlpha() {
+    private stepAlpha() {
         if (!this._didAppear) {
             for (let i = 0; i < this._drawAlpha.length; i++) {
                 this._drawAlpha[i] += this._appearAlphaStep[i];
@@ -185,7 +185,7 @@ export class Visuals {
         }
     }
 
-    hexToRgb(hex) {
+    hexToRgb(hex: string) {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
             r: parseInt(result[1], 16),
@@ -198,7 +198,7 @@ export class Visuals {
         }
     }
 
-    getRandomInt(min, max) {
+    getRandomInt(min: number, max: number): number {
         if (min === undefined || min === null || min < 0) {
             min = 0;
         }

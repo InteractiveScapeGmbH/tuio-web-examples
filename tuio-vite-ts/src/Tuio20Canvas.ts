@@ -1,33 +1,52 @@
-import { Tuio20Client, WebsocketTuioReceiver, ScapeXMobile } from "tuio-client";
+import { ScapeXMobile, SxmConfig, Tuio20Bounds, Tuio20Client, Tuio20Listener, Tuio20Object, Tuio20Pointer, Tuio20Symbol, Tuio20Token, WebsocketTuioReceiver } from "tuio-client";
+import { Visuals } from "./Visuals";
+import { renderSVG } from "uqr";
 import { Vector } from "vecti";
-import { renderSVG } from 'uqr';
-import { Visuals } from "./Visuals.js";
-
-export class Tuio20Canvas {
-	_canvasWidth;
-	_canvasHeight;
-	_sensorWidth;
-	_sensorHeight;
-	_drawingScale;
-	_context;
-	_size;
-	_colors_2;
-	_colorPointer;
-	_shouldDraw;
-	_drawing;
-	_ui;
-	_canvas;
-	_touches;
-	_tokens;
-	_blobs;
-	_tuioReceiver;
-	_tuio20Client;
-	_baseWebsite = "https://interactivescapegmbh.github.io/sxmtest.html";
-	_website = "";
-	_scapeXMobile;
 
 
-	constructor(hostname) {
+interface PointerVisual {
+	tuioPointer: Tuio20Pointer,
+	visual: Visuals,
+}
+
+interface TokenVisual {
+	tuioToken: Tuio20Token,
+	visual: Visuals,
+	uuid: string,
+	time: number,
+}
+
+interface BlobVisual {
+	tuioBounds: Tuio20Bounds,
+	tuioSymbol: Tuio20Symbol,
+	visual: Visuals
+}
+
+export class Tuio20Canvas implements Tuio20Listener {
+	_canvasWidth: number;
+	_canvasHeight: number;
+	_sensorWidth: number;
+	_sensorHeight: number;
+	_drawingScale: number;
+	_context: CanvasRenderingContext2D | null;
+	_size: number[];
+	_colors_2: string[];
+	_colorPointer: number;
+	_shouldDraw: boolean;
+	_drawing: boolean;
+	_ui: HTMLElement | null;
+	_canvas: HTMLCanvasElement | null;
+	_touches: Map<number, PointerVisual>;
+	_tokens: Map<number, TokenVisual>;
+	_blobs: Map<number, BlobVisual>;
+	_tuioReceiver: WebsocketTuioReceiver;
+	_tuio20Client: Tuio20Client;
+	_baseWebsite: string = "https://interactivescapegmbh.github.io/sxmtest.html";
+	_website: string = ""
+	_scapeXMobile: ScapeXMobile;
+
+
+	constructor(hostname: string) {
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
@@ -52,7 +71,7 @@ export class Tuio20Canvas {
 		this._drawing = false;
 
 		this._ui = document.getElementById("tuio20div")
-		this._canvas = document.getElementById("tuio20canvas");
+		this._canvas = document.getElementById("tuio20canvas") as HTMLCanvasElement;
 
 		window.onresize = this.onWindowResize.bind(this);
 
@@ -75,7 +94,7 @@ export class Tuio20Canvas {
 
 	}
 
-	updateQrCodeUrl(config) {
+	private updateQrCodeUrl(config: SxmConfig) {
 		console.log(config)
 		if (config.mqttUrl !== "" && config.roomId !== "") {
 			this._website = `${this._baseWebsite}?r=${config.roomId}&u=${config.mqttUrl}`;
@@ -83,14 +102,14 @@ export class Tuio20Canvas {
 		}
 	}
 
-	getColor() {
+	private getColor() {
 		var use = this._colors_2;
 		let color = use[this._colorPointer];
 		this._colorPointer = (this._colorPointer + 1) % use.length;
 		return color;
 	};
 
-	drawQrCode(data, position, size) {
+	private drawQrCode(data: string, position: Vector, size: Vector) {
 		if (!this._context) return;
 		const svg = renderSVG(data);
 		const img = new Image();
@@ -98,7 +117,7 @@ export class Tuio20Canvas {
 		this._context?.drawImage(img, position.x, position.y, size.x, size.y);
 	}
 
-	draw() {
+	private draw() {
 		if (this._shouldDraw) {
 			this._drawing = true;
 			this.prepareCanvas();
@@ -121,30 +140,30 @@ export class Tuio20Canvas {
 		this._drawing = false;
 	};
 
-	startDrawing() {
+	private startDrawing() {
 		if (!this._shouldDraw) {
 			this._shouldDraw = true
 			window.requestAnimationFrame(this.draw.bind(this));
 		}
 	};
 
-	stopDrawing() {
+	private stopDrawing() {
 		this._shouldDraw = false;
 	};
 
-	openSocket() {
+	private openSocket() {
 		this._tuio20Client.connect();
 		this._scapeXMobile.connect();
 		this.startDrawing();
 	};
 
-	closeSocket() {
+	private closeSocket() {
 		this.stopDrawing();
 		this._tuio20Client.disconnect();
 		this._scapeXMobile.disconnect();
 	};
 
-	addTuioPointer(tuioPointer) {
+	private addTuioPointer(tuioPointer: Tuio20Pointer | null) {
 		if (!tuioPointer) return;
 		this._touches.set(
 			tuioPointer.sessionId,
@@ -155,7 +174,7 @@ export class Tuio20Canvas {
 		);
 	};
 
-	addTuioBounds(tuioBounds, tuioSymbol) {
+	private addTuioBounds(tuioBounds: Tuio20Bounds | null, tuioSymbol: Tuio20Symbol | null) {
 		if (!tuioBounds) return;
 		this._blobs.set(
 			tuioBounds.sessionId,
@@ -167,7 +186,7 @@ export class Tuio20Canvas {
 		);
 	};
 
-	addTuioToken(tuioToken) {
+	private addTuioToken(tuioToken: Tuio20Token | null) {
 		if (!tuioToken) return;
 		console.log(this._tokens);
 		console.log(tuioToken.sessionId);
@@ -183,11 +202,11 @@ export class Tuio20Canvas {
 		console.log(this._tokens);
 	};
 
-	onWindowResize() {
+	private onWindowResize() {
 		this.setCanvasSize(window.innerWidth, window.innerHeight);
 	};
 
-	tuioAdd(tuioObject) {
+	public tuioAdd(tuioObject: Tuio20Object) {
 		console.log("TUIO Add event", true);
 		if (tuioObject.containsNewTuioPointer()) {
 			console.log("Add Pointer", true);
@@ -203,14 +222,14 @@ export class Tuio20Canvas {
 		}
 	}
 
-	tuioUpdate(tuioObject) {
+	public tuioUpdate(tuioObject: Tuio20Object) {
 		// if(tuioObject.containsTuioBounds()){
 		// 	console.log(`bound_id: ${tuioObject.bounds.sessionId}`);
 		// 	console.log(`symbol_id: ${tuioObject.symbol.sessionId}`);
 		// }
 	}
 
-	tuioRemove(tuioObject) {
+	public tuioRemove(tuioObject: Tuio20Object) {
 		console.log("TUIO Remove event", true);
 		if (tuioObject.containsTuioPointer()) {
 			console.log("Remove Pointer", true);
@@ -234,20 +253,20 @@ export class Tuio20Canvas {
 		}
 	}
 
-	tuioRefresh(tuioTime) {
+	public tuioRefresh(tuioTime: TuioTime) {
 		if (this._tuio20Client && this._tuio20Client.dim) {
 			this._size = [this._tuio20Client.dim % 65536, Math.floor(this._tuio20Client.dim / 65536)];
 		}
 	}
 
-	clearObjectsAndTouchesList() {
+	private clearObjectsAndTouchesList() {
 		console.log("clear lists");
 		this._touches = new Map();
 		this._tokens = new Map();
 		this._blobs = new Map();
 	}
 
-	show() {
+	public show() {
 		this.clearObjectsAndTouchesList();
 		if (this._ui) {
 			document.body.append(this._ui);
@@ -255,14 +274,14 @@ export class Tuio20Canvas {
 		this.openSocket();
 	}
 
-	hide() {
+	public hide() {
 		this.stopDrawing();
 		this.closeSocket();
 	}
 
 	// Visualization and utilities
 
-	setCanvasSize(width, height) {
+	private setCanvasSize(width: number, height: number) {
 		if (!!this._canvas) {
 			this._canvas.width = width;
 			this._canvas.height = height;
@@ -273,15 +292,15 @@ export class Tuio20Canvas {
 		}
 	};
 
-	degToRad(deg) {
+	private degToRad(deg: number) {
 		return deg * Math.PI / 180.0;
 	};
 
-	radToDeg(rad) {
+	private radToDeg(rad: number) {
 		return rad * 180.0 / Math.PI;
 	};
 
-	strokeRect(x, y, width, height, angle, radius) {
+	private strokeRect(x: number, y: number, width: number, height: number, angle: number, radius: number) {
 		if (!this._context) return;
 		if (width < 2 * radius) radius = width / 2;
 		if (height < 2 * radius) radius = height / 2;
@@ -300,7 +319,7 @@ export class Tuio20Canvas {
 	}
 
 
-	drawBlob(blob) {
+	private drawBlob(blob: BlobVisual) {
 		if (!this._context) return;
 		blob.visual.step();
 		let i = 0;
@@ -330,7 +349,7 @@ export class Tuio20Canvas {
 		this._context.translate(-(x + w / 2), -(y + h / 2));
 	}
 
-	drawTouch(touch) {
+	private drawTouch(touch: PointerVisual) {
 		if (!this._context) return;
 
 		touch.visual.step();
@@ -346,7 +365,7 @@ export class Tuio20Canvas {
 		this._context.closePath();
 	}
 
-	drawToken(token) {
+	private drawToken(token: TokenVisual) {
 		if (!this._context) return;
 
 		var x = token.tuioToken.position.x * this._size[0] / this._drawingScale;
@@ -390,7 +409,7 @@ export class Tuio20Canvas {
 		this._context.translate(-(x + rectWidth / 2), -(y + rectHeight / 2));
 	}
 
-	prepareCanvas() {
+	private prepareCanvas() {
 		if (!this._context) return;
 
 		this._context.setTransform(1, 0, 0, 1, 0, 0);
