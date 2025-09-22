@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "osc-js": "^2.4.1",
-    "tuio-client": "file:C:/dev/Tools/tuio_client_js",
+    "tuio-client": "github:InteractiveScapeGmbH/tuio_client_js#6-extent-exposed-classes-and-restructure-for-examples",
     "uqr": "0.1.2",
     "vecti": "^3.0.13"
   }
