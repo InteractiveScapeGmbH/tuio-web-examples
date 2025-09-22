@@ -34,7 +34,7 @@ export class Tuio20Canvas {
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
 		this._sensorHeight = 0;
-		this._drawingScale = 0.4;
+		this._drawingScale = 0.8;
 		this._size = [160, 90];
 		this._colors_2 = [
 			'#91d255',
