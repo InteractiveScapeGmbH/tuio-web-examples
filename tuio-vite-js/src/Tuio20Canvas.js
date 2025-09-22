@@ -1,7 +1,8 @@
-import { Tuio20Client, WebsocketTuioReceiver, ScapeXMobile } from "tuio-client";
+import { Tuio20Client, ScapeXMobile } from "tuio-client";
 import { Vector } from "vecti";
 import { renderSVG } from 'uqr';
 import { Visuals } from "./Visuals.js";
+import { WebsocketTuioReceiver } from "./WebsocketTuioReceiver.js";
 
 export class Tuio20Canvas {
 	_canvasWidth;

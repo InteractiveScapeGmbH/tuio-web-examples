@@ -12,8 +12,9 @@
     "vite": "^6.1.0"
   },
   "dependencies": {
+    "osc-js": "^2.4.1",
     "tuio-client": "file:C:/dev/Tools/tuio_client_js",
-    "vecti": "^3.0.13",
-    "uqr": "0.1.2"
+    "uqr": "0.1.2",
+    "vecti": "^3.0.13"
   }
 }
