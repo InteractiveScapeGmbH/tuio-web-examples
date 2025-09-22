@@ -9,6 +9,7 @@ export class Tuio20Canvas {
 	_canvasHeight;
 	_sensorWidth;
 	_sensorHeight;
+	_flipBounds = false;
 	_drawingScale;
 	_context;
 	_size;
@@ -28,7 +29,7 @@ export class Tuio20Canvas {
 	_scapeXMobile;
 
 
-	constructor(hostname, port = 3343) {
+	constructor(hostname, port = 3343, flipBounds = false) {
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
@@ -51,6 +52,8 @@ export class Tuio20Canvas {
 		this._colorPointer = 0;
 		this._shouldDraw = false;
 		this._drawing = false;
+
+		this._flipBounds = flipBounds;
 
 		this._ui = document.getElementById("tuio20div")
 		this._canvas = document.getElementById("tuio20canvas");
@@ -237,7 +240,13 @@ export class Tuio20Canvas {
 
 	tuioRefresh(tuioTime) {
 		if (this._tuio20Client && this._tuio20Client.dim) {
-			this._size = [this._tuio20Client.dim % 65536, Math.floor(this._tuio20Client.dim / 65536)];
+			const width = this._tuio20Client.dim % 65536;
+			const height = Math.floor(this._tuio20Client.dim / 65536);
+			if (this._flipBounds) {
+				this._size = [height, width];
+			} else {
+				this._size = [width, height];
+			}
 		}
 	}
 
@@ -268,7 +277,7 @@ export class Tuio20Canvas {
 			this._canvas.width = width;
 			this._canvas.height = height;
 			this._canvas.style = "{width: width+'px',height: height+'px'}";
-			this._ui.style = "{width: width+'px',height: height+'px'}";
+			if (this._ui) this._ui.style = "{width: width+'px',height: height+'px'}";
 			this._canvasWidth = this._canvas.width;
 			this._canvasHeight = this._canvas.height;
 		}
@@ -323,7 +332,7 @@ export class Tuio20Canvas {
 		this._context.font = "bold 24px Arial";
 		this._context.fillStyle = blob.visual.getColor();
 		this._context.textAlign = "left";
-		const text = "ID: " + (blob.tuioSymbol.data);
+		const text = "ID: " + (blob.tuioSymbol?.data);
 
 		this._context.fillText(text, w / 2 + 20, 0);
 

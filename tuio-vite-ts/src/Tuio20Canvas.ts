@@ -1,4 +1,4 @@
-import { ScapeXMobile, SxmConfig, Tuio20Bounds, Tuio20Client, Tuio20Listener, Tuio20Object, Tuio20Pointer, Tuio20Symbol, Tuio20Token } from "tuio-client";
+import { ScapeXMobile, SxmConfig, Tuio20Bounds, Tuio20Client, Tuio20Listener, Tuio20Object, Tuio20Pointer, Tuio20Symbol, Tuio20Token, TuioTime } from "tuio-client";
 import { Visuals } from "./Visuals";
 import { renderSVG } from "uqr";
 import { Vector } from "vecti";
@@ -19,7 +19,7 @@ interface TokenVisual {
 
 interface BlobVisual {
 	tuioBounds: Tuio20Bounds,
-	tuioSymbol: Tuio20Symbol,
+	tuioSymbol: Tuio20Symbol | null,
 	visual: Visuals
 }
 
@@ -28,6 +28,7 @@ export class Tuio20Canvas implements Tuio20Listener {
 	_canvasHeight: number;
 	_sensorWidth: number;
 	_sensorHeight: number;
+	_flipBounds: boolean = false;
 	_drawingScale: number;
 	_context: CanvasRenderingContext2D | null;
 	_size: number[];
@@ -47,7 +48,7 @@ export class Tuio20Canvas implements Tuio20Listener {
 	_scapeXMobile: ScapeXMobile;
 
 
-	constructor(hostname: string, port: number = 3343) {
+	constructor(hostname: string, port: number = 3343, flipBounds: boolean = false) {
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
@@ -70,6 +71,8 @@ export class Tuio20Canvas implements Tuio20Listener {
 		this._colorPointer = 0;
 		this._shouldDraw = false;
 		this._drawing = false;
+
+		this._flipBounds = flipBounds;
 
 		this._ui = document.getElementById("tuio20div")
 		this._canvas = document.getElementById("tuio20canvas") as HTMLCanvasElement;
@@ -256,7 +259,13 @@ export class Tuio20Canvas implements Tuio20Listener {
 
 	public tuioRefresh(tuioTime: TuioTime) {
 		if (this._tuio20Client && this._tuio20Client.dim) {
-			this._size = [this._tuio20Client.dim % 65536, Math.floor(this._tuio20Client.dim / 65536)];
+			const width = this._tuio20Client.dim % 65536;
+			const height = Math.floor(this._tuio20Client.dim / 65536);
+			if (this._flipBounds) {
+				this._size = [height, width];
+			} else {
+				this._size = [width, height];
+			}
 		}
 	}
 
@@ -287,7 +296,7 @@ export class Tuio20Canvas implements Tuio20Listener {
 			this._canvas.width = width;
 			this._canvas.height = height;
 			this._canvas.style = "{width: width+'px',height: height+'px'}";
-			this._ui.style = "{width: width+'px',height: height+'px'}";
+			if (this._ui) this._ui.style = "{width: width+'px',height: height+'px'}";
 			this._canvasWidth = this._canvas.width;
 			this._canvasHeight = this._canvas.height;
 		}
@@ -342,7 +351,7 @@ export class Tuio20Canvas implements Tuio20Listener {
 		this._context.font = "bold 24px Arial";
 		this._context.fillStyle = blob.visual.getColor();
 		this._context.textAlign = "left";
-		const text = "ID: " + (blob.tuioSymbol.data);
+		const text = "ID: " + (blob.tuioSymbol?.data);
 
 		this._context.fillText(text, w / 2 + 20, 0);
 

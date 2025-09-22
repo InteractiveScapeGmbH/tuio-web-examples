@@ -11,8 +11,8 @@
   <div style="position: fixed; right: 20px">
     <span>Hostname:</span><input type="text" id="hostname" value="10.0.0.20">
     <span>Port:</span><input type="number" id="port" value="3343">
+    <input type="checkbox" id="flipBounds"><label for="flipBounds" title="Enable this if the viewport has the wrong aspect ratio">Flip bounds</label>
     <button id="playPauseButton">Play</button>
-    <button id="clearButton">Clear</button>
   </div>
   <div id="tuio20div">
     <canvas id="tuio20canvas"></canvas>
@@ -21,7 +21,12 @@
   <script type="module">
     import { Tuio20Canvas } from "./src/Tuio20Canvas.js";
     let playPauseButtonElement = document.getElementById("playPauseButton")
-    let clearButtonElement = document.getElementById("clearButton")
+    let flipBoundsElement = document.getElementById("flipBounds");
+    flipBoundsElement.onchange = function () {
+      if (tuio20Canvas) {
+        tuio20Canvas._flipBounds = flipBoundsElement.checked;
+      }
+    }
     let tuio20Canvas = null;
     let play = false
     playPauseButtonElement.onclick = function () {
@@ -30,7 +35,7 @@
       if (play) {
         let hostName = document.getElementById("hostname").value;
         let port = document.getElementById("port").valueAsNumber;
-        tuio20Canvas = new Tuio20Canvas(hostName, port);
+        tuio20Canvas = new Tuio20Canvas(hostName, port, flipBoundsElement.checked);
         tuio20Canvas.show();
       } else {
         tuio20Canvas.hide();
