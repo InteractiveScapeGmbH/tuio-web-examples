@@ -43,6 +43,11 @@ function App() {
     <>
       <h1>TUIO 2.0</h1>
       <div className="card">
+        <svg width={800} height={600} style={{ border: '1px solid black' }}>
+          {pointers.map(pointer => (
+            <circle key={pointer?.sessionId} cx={pointer?.position.x * 800} cy={pointer?.position.y * 600} r="20" fill="blue" />
+          ))}
+        </svg>
 
         {pointers.length > 0 && <><h2>Pointers:</h2>
           <pre>
