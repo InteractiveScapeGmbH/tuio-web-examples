@@ -1,7 +1,8 @@
-import { ScapeXMobile, SxmConfig, Tuio20Bounds, Tuio20Client, Tuio20Listener, Tuio20Object, Tuio20Pointer, Tuio20Symbol, Tuio20Token, WebsocketTuioReceiver } from "tuio-client";
+import { ScapeXMobile, SxmConfig, Tuio20Bounds, Tuio20Client, Tuio20Listener, Tuio20Object, Tuio20Pointer, Tuio20Symbol, Tuio20Token } from "tuio-client";
 import { Visuals } from "./Visuals";
 import { renderSVG } from "uqr";
 import { Vector } from "vecti";
+import { WebsocketTuioReceiver } from "./WebsocketTuioReceiver";
 
 
 interface PointerVisual {
@@ -46,7 +47,7 @@ export class Tuio20Canvas implements Tuio20Listener {
 	_scapeXMobile: ScapeXMobile;
 
 
-	constructor(hostname: string) {
+	constructor(hostname: string, port: number = 3343) {
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
@@ -84,8 +85,8 @@ export class Tuio20Canvas implements Tuio20Listener {
 		this._touches = new Map();
 		this._tokens = new Map();
 		this._blobs = new Map();
-		this._tuioReceiver = new WebsocketTuioReceiver(hostname, 3343);
-		console.log(`Connected to ws://${hostname}:3343`)
+		this._tuioReceiver = new WebsocketTuioReceiver(hostname, port);
+		console.log(`Connected to ws://${hostname}:${port}`)
 		this._tuio20Client = new Tuio20Client(this._tuioReceiver);
 		this._tuio20Client.addTuioListener(this);
 

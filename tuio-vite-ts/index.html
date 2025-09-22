@@ -10,6 +10,7 @@
   <div id="text"></div>
   <div style="position: fixed; right: 20px">
     <span>Hostname:</span><input type="text" id="hostname" value="10.0.0.20">
+    <span>Port:</span><input type="number" id="port" value="3343">
     <button id="playPauseButton">Play</button>
     <button id="clearButton">Clear</button>
   </div>
@@ -28,7 +29,8 @@
       playPauseButtonElement.textContent = play ? "Pause" : "Play";
       if (play) {
         let hostName = document.getElementById("hostname").value;
-        tuio20Canvas = new Tuio20Canvas(hostName);
+        let port = document.getElementById("port").valueAsNumber;
+        tuio20Canvas = new Tuio20Canvas(hostName, port);
         tuio20Canvas.show();
       } else {
         tuio20Canvas.hide();

@@ -27,7 +27,7 @@ export class Tuio20Canvas {
 	_scapeXMobile;
 
 
-	constructor(hostname) {
+	constructor(hostname, port = 3343) {
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
@@ -65,8 +65,8 @@ export class Tuio20Canvas {
 		this._touches = new Map();
 		this._tokens = new Map();
 		this._blobs = new Map();
-		this._tuioReceiver = new WebsocketTuioReceiver(hostname, 3343);
-		console.log(`Connected to ws://${hostname}:3343`)
+		this._tuioReceiver = new WebsocketTuioReceiver(hostname, port);
+		console.log(`Connected to ws://${hostname}:${port}`)
 		this._tuio20Client = new Tuio20Client(this._tuioReceiver);
 		this._tuio20Client.addTuioListener(this);
 
