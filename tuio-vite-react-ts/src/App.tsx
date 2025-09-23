@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
-import { OscJsWebsocketTuioReceiver, Tuio20Client, Tuio20Object } from "tuio-client";
+import { Tuio20Client, Tuio20Object } from "tuio-client";
+import { WebsocketTuioReceiver } from './WebsocketTuioReceiver';
 
 const hostname = 'localhost';
 const port = 3343;
@@ -13,7 +14,7 @@ function App() {
   const getTuio20Client = () => {
     if (tuio20Client.current) return tuio20Client.current;
 
-    const client = new Tuio20Client(new OscJsWebsocketTuioReceiver(hostname, port));
+    const client = new Tuio20Client(new WebsocketTuioReceiver(hostname, port));
     client.addTuioListener({
       tuioAdd: (tuioObject: Tuio20Object) => { setTuioObjects((prevObjects) => [...prevObjects, tuioObject]) },
       tuioUpdate: (tuioObject: Tuio20Object) => { setTuioObjects((prevObjects) => [...prevObjects.map(obj => obj._sessionId === tuioObject._sessionId ? tuioObject : obj)]) },
