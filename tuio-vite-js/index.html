@@ -4,14 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Tuio 2.0 Canvas</title>
+  <style>
+    * {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 
 <body>
   <div id="text"></div>
-  <div style="position: fixed; right: 20px">
-    <span>Hostname:</span><input type="text" id="hostname" value="10.0.0.20">
-    <button id="playPauseButton">Play</button>
-    <button id="clearButton">Clear</button>
+  <div style="position: fixed; right: 20px; background-color: white; display: block; padding: 5px 10px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">
+    <span style="margin-right: 0.5rem;">Hostname:</span><input type="text" id="hostname" value="10.0.0.20" style="width: 5rem;">
+    <span style="margin-left: 0.5rem; margin-right: 0.5rem;">Port:</span><input type="number" id="port" value="3343" style="width: 5rem;">
+    <input type="checkbox" id="flipBounds"><label for="flipBounds" title="Enable this if the viewport has the wrong aspect ratio">Flip bounds</label>
+    <button style="margin-left: 0.5rem" id="playPauseButton">Play</button>
   </div>
   <div id="tuio20div">
     <canvas id="tuio20canvas"></canvas>
@@ -20,7 +27,12 @@
   <script type="module">
     import { Tuio20Canvas } from "./src/Tuio20Canvas.js";
     let playPauseButtonElement = document.getElementById("playPauseButton")
-    let clearButtonElement = document.getElementById("clearButton")
+    let flipBoundsElement = document.getElementById("flipBounds");
+    flipBoundsElement.onchange = function () {
+      if (tuio20Canvas) {
+        tuio20Canvas._flipBounds = flipBoundsElement.checked;
+      }
+    }
     let tuio20Canvas = null;
     let play = false
     playPauseButtonElement.onclick = function () {
@@ -28,7 +40,8 @@
       playPauseButtonElement.textContent = play ? "Pause" : "Play";
       if (play) {
         let hostName = document.getElementById("hostname").value;
-        tuio20Canvas = new Tuio20Canvas(hostName);
+        let port = document.getElementById("port").valueAsNumber;
+        tuio20Canvas = new Tuio20Canvas(hostName, port, flipBoundsElement.checked);
         tuio20Canvas.show();
       } else {
         tuio20Canvas.hide();

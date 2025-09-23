@@ -1,13 +1,15 @@
-import { Tuio20Client, WebsocketTuioReceiver, ScapeXMobile } from "tuio-client";
+import { Tuio20Client, ScapeXMobile } from "tuio-client";
 import { Vector } from "vecti";
 import { renderSVG } from 'uqr';
 import { Visuals } from "./Visuals.js";
+import { WebsocketTuioReceiver } from "./WebsocketTuioReceiver.js";
 
 export class Tuio20Canvas {
 	_canvasWidth;
 	_canvasHeight;
 	_sensorWidth;
 	_sensorHeight;
+	_flipBounds = false;
 	_drawingScale;
 	_context;
 	_size;
@@ -27,12 +29,12 @@ export class Tuio20Canvas {
 	_scapeXMobile;
 
 
-	constructor(hostname) {
+	constructor(hostname, port = 3343, flipBounds = false) {
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
 		this._sensorWidth = 0;
 		this._sensorHeight = 0;
-		this._drawingScale = 0.4;
+		this._drawingScale = 0.8;
 		this._size = [160, 90];
 		this._colors_2 = [
 			'#91d255',
@@ -51,6 +53,8 @@ export class Tuio20Canvas {
 		this._shouldDraw = false;
 		this._drawing = false;
 
+		this._flipBounds = flipBounds;
+
 		this._ui = document.getElementById("tuio20div")
 		this._canvas = document.getElementById("tuio20canvas");
 
@@ -65,8 +69,8 @@ export class Tuio20Canvas {
 		this._touches = new Map();
 		this._tokens = new Map();
 		this._blobs = new Map();
-		this._tuioReceiver = new WebsocketTuioReceiver(hostname, 3343);
-		console.log(`Connected to ws://${hostname}:3343`)
+		this._tuioReceiver = new WebsocketTuioReceiver(hostname, port);
+		console.log(`Connected to ws://${hostname}:${port}`)
 		this._tuio20Client = new Tuio20Client(this._tuioReceiver);
 		this._tuio20Client.addTuioListener(this);
 
@@ -236,7 +240,13 @@ export class Tuio20Canvas {
 
 	tuioRefresh(tuioTime) {
 		if (this._tuio20Client && this._tuio20Client.dim) {
-			this._size = [this._tuio20Client.dim % 65536, Math.floor(this._tuio20Client.dim / 65536)];
+			const width = this._tuio20Client.dim % 65536;
+			const height = Math.floor(this._tuio20Client.dim / 65536);
+			if (this._flipBounds) {
+				this._size = [height, width];
+			} else {
+				this._size = [width, height];
+			}
 		}
 	}
 
@@ -267,7 +277,7 @@ export class Tuio20Canvas {
 			this._canvas.width = width;
 			this._canvas.height = height;
 			this._canvas.style = "{width: width+'px',height: height+'px'}";
-			this._ui.style = "{width: width+'px',height: height+'px'}";
+			if (this._ui) this._ui.style = "{width: width+'px',height: height+'px'}";
 			this._canvasWidth = this._canvas.width;
 			this._canvasHeight = this._canvas.height;
 		}
@@ -322,7 +332,7 @@ export class Tuio20Canvas {
 		this._context.font = "bold 24px Arial";
 		this._context.fillStyle = blob.visual.getColor();
 		this._context.textAlign = "left";
-		const text = "ID: " + (blob.tuioSymbol.data);
+		const text = "ID: " + (blob.tuioSymbol?.data);
 
 		this._context.fillText(text, w / 2 + 20, 0);
 
