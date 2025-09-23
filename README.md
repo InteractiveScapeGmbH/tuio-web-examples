@@ -4,6 +4,10 @@ This Repository contains some example projects which demonstrate how to use the 
 
 ![Screenshot](docs/screenshot.png)
 
+### Simulating TUIO touches and objects
+
+You can use this [TUIO simulator](https://github.com/InteractiveScapeGmbH/tuio-simulator) to simulate touches and objects. Configure it to use WebSocket as the connection type and, TUIO2 as the TUIO version and e.g., port 3343. 
+
 ## Setup
 ```
 git clone https://github.com/InteractiveScapeGmbH/tuio-web-examples.git
@@ -24,6 +28,12 @@ npm install
 npm run dev
 ```
 
-### Simulating TUIO touches and objects
+#### TUIO example with React and TypeScript using Vite
 
-You can use this [TUIO simulator](https://github.com/InteractiveScapeGmbH/tuio-simulator) to simulate touches and objects. Configure it to use WebSocket as the connection type and, TUIO2 as the TUIO version and e.g., port 3343. 
+![Screenshot](docs/screenshot_react.png)
+
+```
+cd tuio-vite-react-ts
+npm install
+npm run dev
+```
